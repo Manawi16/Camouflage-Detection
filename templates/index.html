@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Camouflage Detection</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f8f9fc; /* Smoother, lighter background */
+    color: #1a1a2e;
+  }
+
+  /* ══ BACKGROUND: Concentric rings on right + Glow ══ */
+  .bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  /* Soft glowing aura behind the text */
+  .bg-canvas::before {
+    content: '';
+    position: absolute;
+    top: 50px;
+    left: 20%;
+    width: 60%;
+    height: 500px;
+    background: radial-gradient(ellipse at center, rgba(99,102,241,0.08) 0%, transparent 60%);
+  }
+
+  /* Subtle concentric circles on the top right */
+  .bg-canvas::after {
+    content: '';
+    position: absolute;
+    top: -200px;
+    right: -250px;
+    width: 900px;
+    height: 900px;
+    background-image: repeating-radial-gradient(
+      circle at center,
+      transparent 0,
+      transparent 45px,
+      rgba(99,102,241,0.035) 46px,
+      rgba(99,102,241,0.035) 47px
+    );
+    border-radius: 50%;
+  }
+
+  /* ══ PAGE SHELL ══ */
+  .page {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0 22px;
+    gap: 0;
+    animation: pageIn 0.5s ease;
+  }
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ══ NAVBAR ══ */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 22px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 0 0 16px 16px; 
+    border: 1px solid #eef0f5;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    flex-shrink: 0;
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.nav-logo img {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    filter: drop-shadow(0 2px 4px rgba(99,102,241,0.3));
+}
+  .nav-brand-inline {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .nav-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #0f172a;
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+  }
+  .nav-subtitle {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  /* Container to align links and button to the right */
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+  }
+  .nav-links a {
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: #475569;
+    transition: color 0.2s;
+    position: relative;
+    padding: 6px 0;
+  }
+  .nav-links a.active { color: #4F46E5; }
+  .nav-links a.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    height: 2px;
+    background: #4F46E5;
+    border-radius: 2px;
+  }
+  .nav-links a:hover { color: #4F46E5; }
+
+  .theme-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .theme-btn:hover { background: #e2e8f0; }
+
+  /* ══ HERO ══ */
+  .hero-section {
+    text-align: center;
+    padding: 60px 20px 30px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .dot-grid {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    display: grid;
+    grid-template-columns: repeat(7, 12px);
+    gap: 12px;
+    opacity: 0.3;
+  }
+  .dot-grid span {
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: #4F46E5;
+    display: block;
+  }
+
+  .hero-section h1 {
+    font-size: 42px;
+    font-weight: 700;
+    color: #111827;
+    letter-spacing: -1.2px;
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+  .hero-section p {
+    font-size: 17px;
+    color: #64748b;
+    font-weight: 400;
+    margin-bottom: 24px;
+  }
+
+  .hero-divider {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+  }
+  .hero-divider .line-long {
+    width: 44px; height: 2px;
+    background: linear-gradient(90deg, #4F46E5, #7C3AED);
+    border-radius: 2px;
+  }
+  .hero-divider .dot-accent {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: #7C3AED;
+  }
+  .hero-divider .line-short {
+    width: 16px; height: 2px;
+    background: #cbd5e1;
+    border-radius: 2px;
+  }
+
+  /* ══ CARDS ══ */
+  .cards-section {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    padding: 10px 40px 20px;
+    flex-wrap: wrap;
+    flex: 1;
+    align-items: center;
+  }
+
+  .card {
+    background: #ffffff;
+    border-radius: 16px;
+    width: 300px;
+    padding: 40px 30px 36px;
+    text-align: center;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+  }
+  .card.blue::before   { background: #4F46E5; }
+  .card.purple::before { background: #A855F7; }
+  .card.green::before  { background: #10B981; }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+  }
+
+  .card-dots {
+    position: absolute;
+    bottom: 20px; right: 20px;
+    display: grid;
+    grid-template-columns: repeat(4, 7px);
+    gap: 6px;
+    opacity: 0.08;
+  }
+  .card-dots span {
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: #0f172a;
+    display: block;
+  }
+
+  .icon-wrap {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+  }
+  .card.blue   .icon-wrap { background: #eef2ff; }
+  .card.purple .icon-wrap { background: #faf5ff; }
+  .card.green  .icon-wrap { background: #ecfdf5; }
+  
+  .icon-wrap svg { width: 28px; height: 28px; }
+
+  .card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 12px;
+  }
+  .card p {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 30px;
+  }
+
+  .card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 28px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .card.blue .card-btn   { background: transparent; color: #4F46E5; border: 1.5px solid #4F46E5; }
+  .card.blue .card-btn:hover { background: #4F46E5; color: #fff; }
+
+  .card.purple .card-btn   { background: transparent; color: #A855F7; border: 1.5px solid #A855F7; }
+  .card.purple .card-btn:hover { background: #A855F7; color: #fff; }
+
+  .card.green .card-btn   { background: transparent; color: #10B981; border: 1.5px solid #10B981; }
+  .card.green .card-btn:hover { background: #10B981; color: #fff; }
+
+  .arrow-icon { width: 14px; height: 14px; stroke-width: 2.5; }
+
+  /* ══ FOOTER ══ */
+  .footer-bar {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    padding: 14px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    flex-shrink: 0;
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto 10px auto;
+  }
+
+  .footer-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+  }
+  .footer-sep { color: #cbd5e1; font-size: 14px; }
+  .footer-shield { width: 16px; height: 16px; }
+</style>
+</head>
+<body>
+
+<div class="bg-canvas"></div>
+
+<div class="page">
+
+  <nav>
+    <div class="nav-brand">
+      <div class="nav-logo">
+    <img src="/static/brain.png" alt="logo">
+</div>
+      <div class="nav-brand-inline">
+        <span class="nav-title">Camouflage Detection</span>
+        <span class="nav-subtitle">AI-Powered Vision</span>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="/" class="active">Home</a></li>
+        <li><a href="/demo">Demo</a></li>
+        <li><a href="/dataset">Dataset</a></li>
+        <li><a href="/training">Training</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="hero-section">
+    <div class="dot-grid">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <h1>Apex - Vision</h1>
+    <p>Detect hidden objects using deep learning &amp; segmentation</p>
+    <div class="hero-divider">
+      <div class="line-long"></div>
+      <div class="dot-accent"></div>
+      <div class="line-short"></div>
+    </div>
+  </div>
+
+  <div class="cards-section">
+
+    <div class="card blue">
+      <div class="icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+      </div>
+      <h3>Try Demo</h3>
+      <p>Upload and detect camouflaged objects using our AI model.</p>
+      <a href="/demo" class="card-btn">Open
+        <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </a>
+      <div class="card-dots">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <div class="card purple">
+      <div class="icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+      </div>
+      <h3>Dataset</h3>
+      <p>View annotated images and masks from our dataset.</p>
+      <a href="/dataset" class="card-btn">View
+        <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </a>
+      <div class="card-dots">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <div class="card green">
+      <div class="icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      <h3>Training</h3>
+      <p>See performance metrics and model training progress.</p>
+      <a href="/training" class="card-btn">Explore
+        <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </a>
+      <div class="card-dots">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-bar">
+    <div class="footer-item">
+      <svg class="footer-shield" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <span>Deep Learning Project</span>
+    </div>
+    <span class="footer-sep">•</span>
+    <div class="footer-item">SINet Architecture</div>
+    <span class="footer-sep">•</span>
+    <div class="footer-item">High Precision Detection</div>
+  </div>
+
+</div>
+</body>
+</html>

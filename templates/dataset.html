@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camouflage Detection - Dataset</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8f9fc;
+            color: #1a1a2e;
+            overflow-x: hidden;
+        }
+
+        /* ══ BACKGROUND DECORATIONS ══ */
+        .bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .bg-canvas::before {
+            content: ''; position: absolute; top: 50px; left: 20%; width: 60%; height: 500px;
+            background: radial-gradient(ellipse at center, rgba(99,102,241,0.08) 0%, transparent 60%);
+        }
+        .bg-canvas::after {
+            content: ''; position: absolute; top: -200px; right: -250px; width: 900px; height: 900px;
+            background-image: repeating-radial-gradient(circle at center, transparent 0, transparent 45px, rgba(99,102,241,0.035) 46px, rgba(99,102,241,0.035) 47px);
+            border-radius: 50%;
+        }
+
+        /* ══ NAVBAR ══ */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 26px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #eef0f5;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            margin: 0 22px;
+            margin-top: 0;
+            border-radius: 0 0 16px 16px; 
+            position: relative;
+            z-index: 10;
+            animation: pageIn 0.5s ease forwards;
+        }
+
+        .nav-brand { display: flex; align-items: center; }
+        .nav-logo img { width: 30px; height: 30px; margin-right: 12px; filter: drop-shadow(0 2px 4px rgba(99,102,241,0.3)); }
+        .brand-text { font-size: 18px; font-weight: 700; color: #0f172a; }
+        .brand-sub { font-size: 18px; font-weight: 400; color: #64748b; margin-left: 4px; }
+
+        .nav-links { display: flex; gap: 32px; list-style: none; }
+        .nav-links a { text-decoration: none; font-size: 14px; font-weight: 500; color: #475569; transition: 0.2s; }
+        .nav-links a.active { color: #4F46E5; position: relative; }
+        .nav-links a.active::after {
+            content: ''; position: absolute; bottom: -6px; left: 0; right: 0; height: 2px; background: #4F46E5; border-radius: 2px;
+        }
+        /* ══ CONTAINER ══ */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        h1 { font-size: 40px; font-weight: 800; color: #0f172a; letter-spacing: -1.2px; margin-bottom: 8px; }
+        .subtitle { font-size: 16px; color: #64748b; margin-bottom: 30px; }
+
+        /* ══ STATS BANNER ══ */
+        .stats-banner {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        }
+        .stat-item { display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .stat-icon { width: 40px; height: 40px; background: #f5f7ff; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #4F46E5; }
+        .stat-info { text-align: left; }
+        .stat-label { font-size: 12px; color: #64748b; }
+        .stat-value { font-size: 15px; font-weight: 700; color: #0f172a; }
+.stat-icon img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+        /* ══ DATA GRID ══ */
+ .top-row {
+    position: relative;
+    width: 100%;
+    max-width: 1300px;
+    margin-bottom: 16px; 
+    display: flex;
+    align-items: center;
+}
+
+/* LEFT */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #4F46E5;
+    text-decoration: none;
+}
+
+/* CENTER (ABSOLUTE CENTERING 🔥) */
+.breadcrumb {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    background: #eff6ff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: #4F46E5;
+    font-weight: 600;
+}
+.breadcrumb img {
+    width: 14px;
+    height: 14px;
+}
+.breadcrumb:visited {
+    color: #4F46E5;          /* prevent purple after click */
+}
+
+.breadcrumb:hover {
+    background: #e0e7ff;     /* subtle hover like UI */
+}
+
+        /* ══ UPDATED DATA GRID FOR 6 ITEMS (3 rows of 2) ══ */
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Keeps 2 columns as per your UI image */
+    gap: 20px;
+}
+        .dot-grid {
+            position: absolute;
+            top: 140px;
+            left: 70px;
+            display: grid;
+            grid-template-columns: repeat(7, 12px);
+            gap: 12px;
+            opacity: 0.3;
+        }
+        .dot-grid span { width: 3px; height: 3px; border-radius: 50%; background: #4F46E5; }
+
+        .data-card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            transition: 0.2s ease;
+        }
+        .data-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+
+        .img-wrapper { text-align: center; cursor: pointer; }
+        .img-wrapper p { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #0f172a; }
+        .img-wrapper img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; }
+
+        /* ══ PAGINATION ══ */
+        .pagination {
+            margin-top: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .page-btn {
+            display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    border-radius: 10px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+  }
+  .btn:hover {
+    box-shadow: 0 8px 24px rgba(79,70,229,0.45);
+    transform: translateY(-2px);
+  }
+
+        .page-info { font-size: 14px; color: #64748b; margin: 0 10px; }
+
+        /* ══ MODAL ══ */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: white; width: 80%; max-width: 900px; height: 70vh;
+            border-radius: 20px; display: flex; padding: 30px; gap: 30px; position: relative;
+        }
+        .modal img { width: 60%; object-fit: contain; border-radius: 12px; }
+        .modal-text { width: 40%; display: flex; align-items: center; color: #0f172a; font-size: 16px; line-height: 1.6; }
+        .close-btn { position: absolute; top: 20px; right: 25px; cursor: pointer; font-size: 24px; color: #64748b; }
+    </style>
+</head>
+<body>
+
+<div class="bg-canvas"></div>
+
+<nav>
+    <div class="nav-brand">
+        <div class="nav-logo"><img src="/static/brain.png" alt="logo"></div>
+        <span class="brand-text">Apex - Vision</span>
+    </div>
+    <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/demo">Demo</a></li>
+        <li><a href="/dataset" class="active">Dataset</a></li>
+        <li><a href="/training" >Training</a></li>
+    </ul>
+</nav>
+
+
+
+<div class="container">
+    <div class="dot-grid">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+
+    </div>
+    <div class="top-row">
+
+    <a href="/" class="back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back to Home
+    </a>
+
+    <a href="/" class="breadcrumb">
+        <img src="/static/home.png" alt="home">
+        / Dataset
+    </a>
+
+</div>
+    <h1>Dataset Visualization</h1>
+    <p class="subtitle">Sample images and corresponding ground truth masks used for training</p>
+
+    <div class="stats-banner">
+        <div class="stat-item">
+            <div class="stat-icon"><img src="/static/image.png" alt="folder"></div>
+            <div class="stat-info"><p class="stat-label">Total Images</p><p class="stat-value">748</p></div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon"><img src="/static/layer.png" alt="folder"></div>
+            <div class="stat-info"><p class="stat-label">Total Masks</p><p class="stat-value">748</p></div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon"><img src="/static/folder.png" alt="folder"></div>
+            <div class="stat-info"><p class="stat-label">Dataset</p><p class="stat-value">COD10K, ACD1K</p></div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon"><img src="/static/pie.png" alt="folder"></div>
+            <div class="stat-info"><p class="stat-label">Split Ratio</p><p class="stat-value">80% / 20%</p></div>
+        </div>
+    </div>
+
+    <div class="data-grid">
+        {% for item in data %}
+        <div class="data-card">
+            <div class="img-wrapper" onclick="openModal('/dataset/images/{{ item.img }}', 'Original input image from the dataset. Used by the model to learn patterns and detect camouflaged objects within complex backgrounds.')">
+                <p>Image</p>
+                <img src="/dataset/images/{{ item.img }}">
+            </div>
+            <div class="img-wrapper" onclick="openModal('/dataset/masks/{{ item.mask }}', 'Ground truth segmentation mask for the image.  White regions represent the camouflaged object, while black indicates the background.')">
+                <p>Mask</p>
+                <img src="/dataset/masks/{{ item.mask }}">
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="pagination">
+        {% if page > 1 %}
+            <a href="/dataset?page={{ page-1 }}" class="page-btn">← Previous</a>
+        {% endif %}
+
+        <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+
+        {% if page < total_pages %}
+            <a href="/dataset?page={{ page+1 }}" class="page-btn">Next →</a>
+        {% endif %}
+    </div>
+</div>
+
+<div id="modal" class="modal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-btn" onclick="closeModal()">✖</span>
+        <img id="modalImg">
+        <div class="modal-text" id="modalText"></div>
+    </div>
+</div>
+
+<script>
+function openModal(src, text) {
+    document.getElementById("modal").style.display = "flex";
+    document.getElementById("modalImg").src = src;
+    document.getElementById("modalText").innerText = text;
+}
+function closeModal() {
+    document.getElementById("modal").style.display = "none";
+}
+</script>
+
+</body>
+</html>

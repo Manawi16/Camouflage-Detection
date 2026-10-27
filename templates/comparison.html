@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model Comparison</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f8f9fc;
+    color: #1a1a2e;
+    overflow-x: hidden;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+.page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+
+    /* ══ BACKGROUND DECORATIONS ══ */
+    .bg-canvas {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        overflow: hidden;
+    }
+    .bg-canvas::before {
+        content: ''; position: absolute; top: 50px; left: 20%; width: 60%; height: 500px;
+        background: radial-gradient(ellipse at center, rgba(99,102,241,0.08) 0%, transparent 60%);
+    }
+    .bg-canvas::after {
+        content: ''; position: absolute; top: -200px; right: -250px; width: 900px; height: 900px;
+        background-image: repeating-radial-gradient(circle at center, transparent 0, transparent 45px, rgba(99,102,241,0.035) 46px, rgba(99,102,241,0.035) 47px);
+        border-radius: 50%;
+    }
+    .dot-grid {
+        position: absolute; top: 140px; left: 50px; display: grid; grid-template-columns: repeat(7, 12px); gap: 12px; opacity: 0.3; z-index: -1;
+    }
+    .dot-grid span { width: 3px; height: 3px; border-radius: 50%; background: #4F46E5; }
+
+    /* ══ NAVBAR ══ */
+          /* ══ NAVBAR ══ */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 26px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #eef0f5;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            margin: 0 22px;
+            margin-top: 0;
+            border-radius: 0 0 16px 16px; 
+            position: relative;
+            z-index: 10;
+            animation: pageIn 0.5s ease forwards;
+        }
+
+        .nav-brand { display: flex; align-items: center; }
+        .nav-logo img { width: 30px; height: 30px; margin-right: 12px; filter: drop-shadow(0 2px 4px rgba(99,102,241,0.3)); }
+        .brand-text { font-size: 18px; font-weight: 700; color: #0f172a; }
+        .brand-sub { font-size: 18px; font-weight: 400; color: #64748b; margin-left: 4px; }
+
+        .nav-links { display: flex; gap: 32px; list-style: none; }
+        .nav-links a { text-decoration: none; font-size: 14px; font-weight: 500; color: #475569; transition: 0.2s; }
+        .nav-links a.active { color: #4F46E5; position: relative; }
+        .nav-links a.active::after {
+            content: ''; position: absolute; bottom: -6px; left: 0; right: 0; height: 2px; background: #4F46E5; border-radius: 2px;
+        }
+
+    /* ══ PAGE HEADERS ══ */
+   .container {
+    flex: 1;                     /* 🔥 REQUIRED */
+    overflow-y: auto;            /* 🔥 ENABLE SCROLL */
+
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    text-align: center;
+
+    /* hide scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.container::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+    h1 { font-size: 44px; font-weight: 800; color: #0f172a; letter-spacing: -1.2px; margin-bottom: 12px; }
+    .subtitle { font-size: 16px; color: #64748b; margin-bottom: 24px; font-weight: 500;}
+
+  .hero-divider { display: flex; justify-content: center; align-items: center; gap: 4px;margin-bottom:20px; }
+  .hero-divider .line-long { width: 36px; height: 3px; background: linear-gradient(90deg, #4F46E5, #7C3AED); border-radius: 2px; }
+  .hero-divider .dot-accent { width: 6px; height: 6px; border-radius: 50%; background: #6366f1; }
+  .hero-divider .line-short { width: 20px; height: 3px; background: #e2e8f0; border-radius: 2px; }
+
+    /* ══ TABLE / GRID STYLE ══ */
+    .row {
+        display: grid;
+        grid-template-columns: 1fr 2.5fr 2.5fr; /* Matches the layout proportions */
+        gap: 24px;
+        margin-bottom: 24px;
+        align-items: stretch;
+    }
+
+    .block {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .block h4 {
+        font-size: 15px;
+        color: #0f172a;
+        font-weight: 700;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    /* Input card specific */
+    .input-img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+
+    /* IMAGE GRID INSIDE BEFORE/AFTER */
+    .inner-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        flex-grow: 1;
+    }
+
+    .img-card {
+        cursor: pointer;
+        transition: 0.2s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .img-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .img-card img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .label {
+        font-size: 13px;
+        color: #64748b;
+        margin-top: 12px;
+        font-weight: 500;
+        text-align: center;
+    }
+.top-bar {
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto 10px auto;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    font-size: 14px;
+    font-weight: 500;
+    color: #4F46E5;
+
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+
+    transition: all 0.2s ease;
+}
+
+    /* ══ FOOTER BANNER ══ */
+    .footer-banner {
+        margin: 40px auto 20px auto;
+        background: #eff6ff;
+        padding: 16px 24px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        max-width: 900px;
+    }
+    .footer-banner p { font-size: 14px; color: #1e40af; font-weight: 500; }
+
+    /* ══ MODAL (Updated to match light theme) ══ */
+    .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(6px);
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+
+    .modal-box {
+        width: 80%;
+        max-width: 900px;
+        background: #ffffff;
+        border-radius: 20px;
+        display: flex;
+        gap: 30px;
+        padding: 32px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal img {
+        width: 60%;
+        object-fit: contain;
+        border-radius: 12px;
+    }
+
+    .modal-text {
+        width: 40%;
+        display: flex;
+        align-items: center;
+        color: #0f172a;
+        font-size: 18px;
+        font-weight: 500;
+        line-height: 1.5;
+    }
+
+    .close {
+        position: absolute;
+        top: 24px;
+        right: 32px;
+        font-size: 32px;
+        color: #ffffff;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .close:hover { color: #cbd5e1; }
+</style>
+</head>
+
+<body>
+
+<div class="bg-canvas"></div>
+<div class="dot-grid">
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+</div>
+<div class="page">
+<nav>
+    <div class="nav-brand">
+        <div class="nav-logo"><img src="/static/brain.png" alt="logo"></div>
+        <span class="brand-text">Apex - Vision</span>
+    </div>
+    <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/demo">Demo</a></li>
+        <li><a href="/dataset">Dataset</a></li>
+        <li><a href="/training" class="active">Training</a></li>
+    </ul>
+</nav>
+
+
+<div class="container">
+<div class="top-bar">
+    <a href="/training" class="back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back to Training
+    </a>
+</div>
+    <h1>Before vs After Fine-Tuning</h1>
+    <p class="subtitle">Comparison of model performance across outputs</p>
+    
+      <div class="hero-divider">
+        <div class="line-long"></div>
+        <div class="dot-accent"></div>
+        <div class="line-short"></div>
+      </div>
+
+    {% for i in range(1,6) %}
+
+    <div class="row">
+
+        <div class="block">
+            <h4>Input {{i}}</h4>
+            <img src="/static/comparison/{{i}}_input.jpg" class="input-img">
+        </div>
+
+        <div class="block">
+            <h4>Before</h4>
+            <div class="inner-grid">
+
+                <div class="img-card" onclick="openModal('/static/comparison/{{i}}_before_mask.png','Segmentation mask before fine-tuning.  Object boundaries are less precise and may miss parts of the camouflaged region.')">
+                    <img src="/static/comparison/{{i}}_before_mask.png">
+                    <div class="label">Mask</div>
+                </div>
+
+                <div class="img-card" onclick="openModal('/static/comparison/{{i}}_before_heatmap.png','Attention heatmap before fine-tuning.  Model focus is scattered and includes irrelevant background regions.')">
+                    <img src="/static/comparison/{{i}}_before_heatmap.png">
+                    <div class="label">Heatmap</div>
+                </div>
+
+                <div class="img-card" onclick="openModal('/static/comparison/{{i}}_before_bbox.png','Bounding box prediction before fine-tuning.  Localization is less accurate and may not tightly fit the object.')">
+                    <img src="/static/comparison/{{i}}_before_bbox.png">
+                    <div class="label">BBox</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="block">
+            <h4>After</h4>
+            <div class="inner-grid">
+
+                <div class="img-card" onclick="openModal('/static/comparison/{{i}}_after_mask.png','Segmentation mask after fine-tuning.  Object boundaries are more precise and capture the full extent of the camouflaged region.')">
+                    <img src="/static/comparison/{{i}}_after_mask.png">
+                    <div class="label">Mask</div>
+                </div>
+
+                <div class="img-card" onclick="openModal('/static/comparison/{{i}}_after_heatmap.png','Attention heatmap after fine-tuning.  Model focuses more precisely on relevant regions of the object.')">
+                    <img src="/static/comparison/{{i}}_after_heatmap.png">
+                    <div class="label">Heatmap</div>
+                </div>
+
+                <div class="img-card" onclick="openModal('/static/comparison/{{i}}_after_bbox.png','Bounding box after fine-tuning.  Localization is tighter and better aligned with the detected object.')">
+                    <img src="/static/comparison/{{i}}_after_bbox.png">
+                    <div class="label">BBox</div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+    <div class="footer-banner">
+        <div style="background: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border: 1px solid #bfdbfe;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <polyline points="9 12 11 14 15 10"></polyline>
+            </svg>
+        </div>
+        <p>Fine-tuning significantly improves the model's ability to localize and segment camouflaged objects.</p>
+    </div>
+
+</div>
+
+<div id="modal" class="modal" onclick="closeModal()">
+    <span class="close" onclick="closeModal()">✖</span>
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <img id="modalImg">
+        <div class="modal-text" id="modalText"></div>
+    </div>
+</div>
+
+<script>
+function openModal(src, text) {
+    document.getElementById("modal").style.display = "flex";
+    document.getElementById("modalImg").src = src;
+    document.getElementById("modalText").innerText = text;
+}
+
+function closeModal() {
+    document.getElementById("modal").style.display = "none";
+}
+</script>
+</div>
+</body>
+</html>

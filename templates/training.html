@@ -1,0 +1,1522 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training & Results</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    font-family: 'Inter', sans-serif;   
+  height: 100%;
+  }    
+
+body {
+            font-family: 'Inter', sans-serif;
+            background: #f8f9fc;
+            color: #1a1a2e;
+        }
+        .bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bg-canvas::before {
+            content: '';
+            position: absolute;
+            top: 50px;
+            left: 20%;
+            width: 60%;
+            height: 500px;
+            background: radial-gradient(ellipse at center, rgba(99,102,241,0.08) 0%, transparent 60%);
+        }
+
+        .bg-canvas::after {
+            content: '';
+            position: absolute;
+            top: -200px;
+            right: -250px;
+            width: 900px;
+            height: 900px;
+            background-image: repeating-radial-gradient(
+                circle at center,
+                transparent 0,
+                transparent 45px,
+                rgba(99,102,241,0.035) 46px,
+                rgba(99,102,241,0.035) 47px
+            );
+            border-radius: 50%;
+        }
+  /* ══ PAGE SHELL ══ */
+  .page {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    padding: 0px;
+    gap: 0;
+    animation: pageIn 0.5s ease;
+  }
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 26px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #eef0f5;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            margin: 0 22px;
+            margin-top: 0;
+            border-radius: 0 0 16px 16px; 
+            position: relative;
+            z-index: 10;
+            animation: pageIn 0.5s ease forwards;
+        }
+
+        .nav-brand { display: flex; align-items: center; }
+        .nav-logo img { width: 30px; height: 30px; margin-right: 12px; filter: drop-shadow(0 2px 4px rgba(99,102,241,0.3)); }
+        .brand-text { font-size: 18px; font-weight: 700; color: #0f172a; }
+        .brand-sub { font-size: 18px; font-weight: 400; color: #64748b; margin-left: 4px; }
+
+        .nav-links { display: flex; gap: 32px; list-style: none; }
+        .nav-links a { text-decoration: none; font-size: 14px; font-weight: 500; color: #475569; transition: 0.2s; }
+        .nav-links a.active { color: #4F46E5; position: relative; }
+        .nav-links a.active::after {
+            content: ''; position: absolute; bottom: -6px; left: 0; right: 0; height: 2px; background: #4F46E5; border-radius: 2px;
+        }
+
+  /* ══ SCROLLABLE MAIN CONTENT ══ */
+  .main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 0 14px 0;
+    /* hide scrollbar visually */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+.main-content::-webkit-scrollbar {
+    display: none;
+}
+
+  /* ══ HERO ══ */
+  .hero-section {
+    text-align: center;
+    padding: 38px 20px 22px;
+    position: relative;
+  }
+  .dot-grid {
+    position: absolute; top: 78px; left: 48px;
+    display: grid; grid-template-columns: repeat(7, 10px); gap: 9px; opacity: 0.45;
+  }
+  .dot-grid span { width: 3px; height: 3px; border-radius: 50%; background: #94a3b8; display: block; }
+
+  .hero-section h1 { font-size: 42px; font-weight: 800; color: #0f172a; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 10px; }
+  .hero-section p { font-size: 15.5px; color: #64748b; font-weight: 400; margin-bottom: 16px; }
+
+  .hero-divider { display: flex; justify-content: center; align-items: center; gap: 4px; }
+  .hero-divider .line-long { width: 36px; height: 3px; background: linear-gradient(90deg, #4F46E5, #7C3AED); border-radius: 2px; }
+  .hero-divider .dot-accent { width: 6px; height: 6px; border-radius: 50%; background: #6366f1; }
+  .hero-divider .line-short { width: 20px; height: 3px; background: #e2e8f0; border-radius: 2px; }
+
+  /* ══ CONTENT WRAPPER ══ */
+  .content-wrap {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* ══ INFO BANNER ══ */
+ .info-banner {
+  background: #f3f4ff; /* soft purple tint like image */
+  border: none;
+  border-radius: 18px;
+
+  padding: 22px 28px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+
+  margin: 0 auto 28px auto;
+  max-width: 900px;   /* 🔥 IMPORTANT: controls width like image */
+
+  box-shadow: 0 6px 20px rgba(99,102,241,0.08);
+}
+.info-banner-icon {
+  width: 56px;
+  height: 56px;
+
+  background: #e0e7ff;   /* softer + flatter */
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+  .info-banner-icon svg { width: 28px; height: 28px; }
+.info-banner p {
+  font-size: 14.5px;
+  color: #475569;
+  line-height: 1.7;
+  max-width: 650px;  /* 🔥 prevents stretching */
+}
+
+  /* ══ METRICS ══ */
+  .metrics-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .metric-card {
+    background: #fff;
+    border: 1px solid #e8eaf0;
+    border-radius: 16px;
+    padding: 18px 22px;
+    flex: 1;
+    min-width: 190px;
+    max-width: 240px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    cursor: pointer;
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+  .metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(79,70,229,0.14);
+  }
+
+  .metric-icon {
+    width: 48px; height: 48px; flex-shrink: 0;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .metric-icon svg { width: 24px; height: 24px; }
+
+  .metric-icon.purple { background: #f0eeff; }
+  .metric-icon.blue   { background: #eef2ff; }
+  .metric-icon.red    { background: #fff0f0; }
+  .metric-icon.green  { background: #ecfdf5; }
+
+  .metric-info { display: flex; flex-direction: column; }
+  .metric-title { font-size: 12.5px; color: #94a3b8; font-weight: 500; margin-bottom: 3px; }
+  .metric-value { font-size: 22px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px; }
+
+  /* Loss Improvement card — centered, special */
+  .metrics-row-center {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .metric-card.improvement {
+    max-width: 280px;
+    border: 1px solid #e8eaf0;
+  }
+  .metric-card.improvement .metric-value { color: #4F46E5; font-size: 26px; }
+  .metric-icon.indigo { background: #eef2ff; }
+
+  /* ══ GRAPH CARD ══ */
+  .graph-card {
+    background: #fff;
+    border: 1px solid #e8eaf0;
+    border-radius: 18px;
+    padding: 26px 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.05);
+    transition: box-shadow 0.3s, transform 0.3s;
+  }
+  .graph-card:hover {
+    box-shadow: 0 0 24px rgba(99,102,241,0.18), 0 4px 20px rgba(0,0,0,0.06);
+    transform: scale(1.005);
+  }
+
+  .graph-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .graph-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .graph-title-icon {
+    width: 30px; height: 30px;
+    background: #eef2ff;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .graph-title-icon svg { width: 16px; height: 16px; }
+  .graph-title { font-size: 15px; font-weight: 700; color: #0f172a; }
+
+  .graph-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+
+  /* ══ SECTION TITLES ══ */
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+
+  text-align: center;   /* 🔥 MAIN FIX */
+  margin-bottom: 18px;
+}
+
+ .top-row {
+    position: relative;
+    width: 100%;
+    max-width: 1300px;
+    margin-bottom: 16px; 
+    display: flex;
+    align-items: center;
+}
+
+/* LEFT */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #4F46E5;
+    text-decoration: none;
+}
+
+/* CENTER (ABSOLUTE CENTERING 🔥) */
+.breadcrumb {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    background: #eff6ff;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+      text-decoration: none;
+    color: #4F46E5;
+    font-weight: 600;
+}
+.breadcrumb img {
+    width: 14px;
+    height: 14px;
+}
+.breadcrumb:visited {
+    color: #4F46E5;          /* prevent purple after click */
+}
+
+.breadcrumb:hover {
+    background: #e0e7ff;
+    text-decoration: none;
+}
+.summary-panel{
+  background:linear-gradient(
+    135deg,
+    rgba(99,102,241,0.08),
+    rgba(124,58,237,0.06)
+  );
+  border:1px solid #e9e9ff;
+  border-radius:18px;
+  padding:22px 28px;
+  margin:0 auto 26px auto;
+  max-width:850px;
+  text-align:center;
+  box-shadow:0 6px 20px rgba(99,102,241,0.08);
+}
+
+.summary-title{
+  font-size:18px;
+  font-weight:700;
+  color:#0f172a;
+  margin-bottom:8px;
+}
+
+.summary-text{
+  color:#64748b;
+  font-size:14.5px;
+  line-height:1.7;
+}
+
+.summary-text b{
+  color:#4F46E5;
+}
+.weight-card {
+
+  position: relative;
+
+  overflow: hidden;
+
+  flex: 1 1 220px;
+
+  max-width: 240px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(238,242,255,0.88),
+      rgba(248,250,255,0.78)
+    );
+
+  border: 1px solid rgba(99,102,241,0.14);
+
+  border-radius: 22px;
+
+  padding: 24px 30px;
+
+  text-align: center;
+
+  backdrop-filter: blur(18px);
+
+  -webkit-backdrop-filter: blur(18px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.65),
+    0 6px 24px rgba(99,102,241,0.10),
+    0 2px 8px rgba(15,23,42,0.04);
+
+  transition:
+    transform 0.32s ease,
+    box-shadow 0.32s ease,
+    border-color 0.32s ease;
+}
+
+.weight-card::before {
+
+  content: '';
+
+  position: absolute;
+
+  top: 0;
+  left: -30%;
+
+  width: 70%;
+  height: 2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(99,102,241,0.6),
+      transparent
+    );
+}
+
+.weight-card::after {
+
+  content: '';
+
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(99,102,241,0.08),
+      transparent 60%
+    );
+
+  pointer-events: none;
+}
+
+.weight-card:hover {
+
+  transform:
+    translateY(-6px)
+    scale(1.025);
+
+  border-color:
+    rgba(99,102,241,0.24);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.72),
+    0 18px 44px rgba(99,102,241,0.20),
+    0 4px 14px rgba(15,23,42,0.06);
+}
+.flip-grid{
+
+  display:flex;
+
+  justify-content:center;
+
+  gap:24px;
+
+  flex-wrap:wrap;
+
+  margin-bottom:60px;
+
+  margin-top:10px;
+}
+
+.flip-card{
+
+  width:320px;
+
+  height:190px;
+
+  perspective:1200px;
+}
+
+.flip-inner{
+
+  position:relative;
+
+  width:100%;
+
+  height:100%;
+
+  transition:transform 0.8s;
+
+  transform-style:preserve-3d;
+}
+
+.flip-card:hover .flip-inner{
+
+  transform:rotateY(180deg);
+}
+
+.flip-front,
+.flip-back{
+
+  position:absolute;
+
+  width:100%;
+
+  height:100%;
+
+  border-radius:22px;
+
+  backface-visibility:hidden;
+
+  display:flex;
+
+  flex-direction:column;
+
+  justify-content:center;
+
+  align-items:center;
+
+  padding:24px;
+
+  text-align:center;
+}
+
+.flip-back{
+
+  transform:rotateY(180deg);
+}
+
+.flip-front h3{
+
+  font-size:18px;
+
+  font-weight:700;
+
+  color:#0f172a;
+
+  margin-bottom:12px;
+}
+
+.flip-label{
+
+  font-size:34px;
+
+  font-weight:800;
+
+  color:#4F46E5;
+
+  letter-spacing:-1px;
+}
+
+.flip-back p{
+
+  font-size:14px;
+
+  line-height:1.7;
+
+  color:#64748b;
+}
+.flip-front,
+.flip-back {
+
+  position: absolute;
+
+  width: 100%;
+  height: 100%;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(238,242,255,0.88),
+      rgba(248,250,255,0.78)
+    );
+
+  border: 1px solid rgba(99,102,241,0.14);
+
+  border-radius: 22px;
+
+  backface-visibility: hidden;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  align-items: center;
+
+  padding: 22px;
+
+  overflow: hidden;
+
+  backdrop-filter: blur(18px);
+
+  -webkit-backdrop-filter: blur(18px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.65),
+    0 6px 24px rgba(99,102,241,0.10),
+    0 2px 8px rgba(15,23,42,0.04);
+
+  transition:
+    box-shadow 0.32s ease,
+    border-color 0.32s ease,
+    transform 0.32s ease;
+}
+
+.flip-front::before,
+.flip-back::before {
+
+  content: '';
+
+  position: absolute;
+
+  top: 0;
+  left: -30%;
+
+  width: 70%;
+  height: 2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(99,102,241,0.6),
+      transparent
+    );
+}
+
+.flip-front::after,
+.flip-back::after {
+
+  content: '';
+
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(99,102,241,0.08),
+      transparent 60%
+    );
+
+  pointer-events: none;
+}
+
+.flip-card:hover .flip-front,
+.flip-card:hover .flip-back {
+
+  border-color:
+    rgba(99,102,241,0.24);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.72),
+    0 18px 44px rgba(99,102,241,0.20),
+    0 4px 14px rgba(15,23,42,0.06);
+}
+.status-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  background:#ecfdf5;
+  color:#059669;
+  padding:10px 18px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:600;
+  margin-top:4px;
+  box-shadow:0 4px 14px rgba(5,150,105,0.10);
+}
+
+.status-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#10b981;
+  animation:pulseDot 1.8s infinite;
+}
+
+@keyframes pulseDot{
+  0%{ transform:scale(1); opacity:1; }
+  50%{ transform:scale(1.5); opacity:.6; }
+  100%{ transform:scale(1); opacity:1; }
+}
+
+  /* ══ BOTTOM ACTION ROW ══ */
+  .action-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 18px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    border-radius: 10px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+  }
+  .btn:hover {
+    box-shadow: 0 8px 24px rgba(79,70,229,0.45);
+    transform: translateY(-2px);
+  }
+tbody tr{
+  transition:background 0.2s ease;
+}
+
+tbody tr:hover{
+  background:#f8fafc;
+}
+  /* ══ FOOTER CARD ══ */
+  .footer-bar {
+    background: #fff;
+    border-radius: 13px;
+    border: 1px solid #e2e6f0;
+    box-shadow: 0 2px 18px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
+    padding: 13px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+  .graph-card,
+.metric-card,
+.arch-card,
+.flip-card{
+  animation:fadeUp 0.6s ease both;
+}
+.weights-grid {
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: stretch;
+
+  gap: 20px;
+
+  flex-wrap: wrap;
+
+  margin-bottom: 28px;
+}
+@keyframes fadeUp{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+  .footer-shield { width: 18px; height: 18px; }
+  .footer-text { font-size: 13px; color: #64748b; font-weight: 500; }
+
+.graph-note{
+  text-align:center;
+  font-size:13px;
+  color:#94a3b8;
+  margin-top:-4px;
+  margin-bottom:26px;
+}
+.sys-pill{
+  background:#fff;
+  border:1px solid #e2e8f0;
+  border-radius:999px;
+  padding:8px 16px;
+  font-size:12px;
+  font-weight:600;
+  color:#64748b;
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+.best-tag{
+  margin-top:6px;
+  display:inline-block;
+  background:#eef2ff;
+  color:#4F46E5;
+  font-size:10px;
+  font-weight:700;
+  padding:4px 8px;
+  border-radius:999px;
+}
+  /* ══ MODAL ══ */
+  .modal {
+    display: none;
+    position: fixed; z-index: 999;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.45);
+    justify-content: center; align-items: center;
+  }
+  .modal-content {
+    display: flex;
+    background: #fff;
+    border-radius: 18px;
+    padding: 32px;
+    width: 60%;
+    max-width: 560px;
+    gap: 20px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    border: 1px solid #e8eaf0;
+  }
+  .modal img { max-width: 45%; border-radius: 10px; }
+  .modal-text { color: #64748b; line-height: 1.65; font-size: 14px; }
+  .close-btn {
+    position: absolute; top: 14px; right: 18px;
+    cursor: pointer; font-size: 18px; color: #94a3b8;
+    background: none; border: none; line-height: 1;
+  }
+  .close-btn:hover { color: #1a1a2e; }
+</style>
+</head>
+<body>
+
+<div class="bg-canvas"></div>
+
+<div class="page">
+
+  <!-- ── NAVBAR ── -->
+<nav>
+    <div class="nav-brand">
+        <div class="nav-logo"><img src="/static/brain.png" alt="logo"></div>
+        <span class="brand-text">Apex - Vision</span>
+    </div>
+    <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/demo">Demo</a></li>
+        <li><a href="/dataset">Dataset</a></li>
+        <li><a href="/training" class="active">Training</a></li>
+    </ul>
+</nav>
+
+  <!-- ── SCROLLABLE CONTENT ── -->
+  <div class="main-content">
+
+    <!-- HERO -->
+    <div class="hero-section">
+      <div class="dot-grid">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+<div class="top-row">
+
+    <a href="/" class="back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back to Home
+    </a>
+
+    <a href="/" class="breadcrumb">
+        <img src="/static/home.png" alt="home">
+        / Training
+    </a>
+
+</div>
+      <h1>Training &amp; Results</h1>
+      <p>Fine-tuning SINet on camouflaged object dataset</p>
+      <div class="status-badge">
+  <span class="status-dot"></span>
+  Training Completed Successfully
+</div>
+      <div class="hero-divider">
+        <div class="line-long"></div>
+        <div class="dot-accent"></div>
+        <div class="line-short"></div>
+      </div>
+    </div>
+
+    <div class="content-wrap">
+
+      <!-- INFO BANNER -->
+      <div class="info-banner">
+        <div class="info-banner-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9.5 2a2.5 2.5 0 0 1 5 0v.5"/>
+            <path d="M14.5 2.5C17.5 3 20 5.5 20 8.5c0 1.5-.5 2.9-1.4 4"/>
+            <path d="M9.5 2.5C6.5 3 4 5.5 4 8.5c0 1.5.5 2.9 1.4 4"/>
+            <path d="M6 14a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4"/>
+            <path d="M12 18v3"/><path d="M9 21h6"/>
+            <circle cx="9" cy="9" r="1"/><circle cx="15" cy="9" r="1"/>
+            <path d="M9 13h6"/>
+          </svg>
+        </div>
+        <p>
+          The SINet model with ResNet50 backbone was fine-tuned on a subset of the COD10K dataset.
+          The model learns to segment camouflaged objects by minimizing binary cross-entropy loss.
+        </p>
+      </div>
+<div class="summary-panel">
+  <div class="summary-title">
+    Segmentation Performance Summary
+  </div>
+
+  <div class="summary-text">
+    SINet achieved 
+    <b>{{ logs.final_f1 }}</b> F1 Score and 
+    <b>{{ logs.final_iou }}</b> IoU with strong camouflage segmentation consistency across complex backgrounds.
+  </div>
+</div>
+      <!-- METRICS ROW 1: 4 cards -->
+      <div class="metrics-row">
+
+        <div class="metric-card" onclick="openModal('', 'Epochs represent the number of complete passes through the training dataset. More epochs allow the SINet model to learn better features for detecting camouflaged objects hidden in complex backgrounds.')">
+          <div class="metric-icon purple">
+            <!-- layers/stack icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+              <polyline points="2 17 12 22 22 17"/>
+              <polyline points="2 12 12 17 22 12"/>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <span class="metric-title">Epochs</span>
+            <span class="metric-value counter"
+data-target="{{ logs.final_iou }}">
+0
+</span>
+          </div>
+        </div>
+
+        <div class="metric-card" onclick="openModal('', 'Initial Loss shows how wrong the model was at the beginning of training. A high value means the model initially struggled to detect camouflaged objects due to low contrast.')">
+          <div class="metric-icon blue">
+            <!-- trending up icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+              <polyline points="17 6 23 6 23 12"/>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <span class="metric-title">Initial Loss</span>
+            <span class="metric-value">{{ logs.initial_loss | round(3) }}</span>
+          </div>
+        </div>
+
+        <div class="metric-card" onclick="openModal('', 'Final Loss indicates how well the model improved after training. Lower loss means better segmentation of hidden objects.')">
+          <div class="metric-icon red">
+            <!-- trending down icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
+              <polyline points="17 18 23 18 23 12"/>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <span class="metric-title">Final Loss</span>
+            <span class="metric-value">{{ logs.final_loss | round(3) }}</span>
+          </div>
+        </div>
+
+        <div class="metric-card" onclick="openModal('', 'Dataset Size represents the number of training images. A larger dataset helps the model generalize better for different camouflage patterns.')">
+          <div class="metric-icon green">
+            <!-- database icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="12" cy="5" rx="9" ry="3"/>
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <span class="metric-title">Dataset Size</span>
+            <span class="metric-value">{{ logs.dataset_size }} Images</span>
+          </div>
+        </div>
+
+      </div>
+
+<!-- ADVANCED METRICS -->
+<div class="metrics-row">
+        <div class="metric-card improvement" onclick="openModal('', 'Loss Improvement shows how much the model has learned during training. Higher percentage indicates better optimization and learning efficiency.')">
+          <div class="metric-icon indigo">
+            <!-- arrow up-right icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"/>
+              <polyline points="7 7 17 7 17 17"/>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <span class="metric-title">Loss Improvement</span>
+            <span class="metric-value">
+              {{ ((logs.initial_loss - logs.final_loss) / logs.initial_loss * 100) | round(2) }}%
+            </span>
+          </div>
+        </div>
+  <div class="metric-card">
+    <div class="metric-icon purple">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="1.8">
+        <circle cx="12" cy="12" r="9"/>
+      </svg>
+    </div>
+    <div class="metric-info">
+      <span class="metric-title">IoU Score</span>
+      <span class="metric-value">{{ logs.final_iou }}</span>
+    </div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-icon blue">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="1.8">
+        <path d="M4 12l5 5L20 6"/>
+      </svg>
+    </div>
+    <div class="metric-info">
+      <span class="metric-title">F1 Score</span>
+      <span class="metric-value">{{ logs.final_f1 }}</span>
+    </div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-icon green">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="1.8">
+        <path d="M12 2v20"/>
+        <path d="M5 9l7-7 7 7"/>
+      </svg>
+    </div>
+    <div class="metric-info">
+      <span class="metric-title">Precision</span>
+      <span class="metric-value">{{ logs.final_precision }}</span>
+    </div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-icon red">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.8">
+        <path d="M19 14l-7 7-7-7"/>
+        <path d="M12 21V3"/>
+      </svg>
+    </div>
+    <div class="metric-info">
+      <span class="metric-title">Recall</span>
+      <span class="metric-value">{{ logs.final_recall }}</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="metrics-row">
+
+  <div class="metric-card">
+    <div class="metric-icon indigo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="1.8">
+        <rect x="3" y="3" width="18" height="18" rx="3"/>
+      </svg>
+    </div>
+    <div class="metric-info">
+      <span class="metric-title">Dice Score</span>
+      <span class="metric-value">{{ logs.final_dice }}</span>
+    </div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-icon blue">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="1.8">
+        <path d="M3 12h18"/>
+        <path d="M12 3v18"/>
+      </svg>
+    </div>
+    <div class="metric-info">
+      <span class="metric-title">Pixel Accuracy</span>
+      <span class="metric-value">{{ logs.final_pixel_accuracy }}</span>
+    </div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-icon green">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="1.8">
+        <circle cx="12" cy="12" r="10"/>
+      </svg>
+    </div>
+    <div class="metric-info">
+      <div class="best-tag">
+  BEST
+</div>
+      <span class="metric-title">Best Epoch</span>
+      <span class="metric-value">{{ logs.best_epoch }}</span>
+    </div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-icon purple">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="1.8">
+        <rect x="2" y="6" width="20" height="12" rx="2"/>
+      </svg>
+    </div>
+    <div class="metric-info">
+      <span class="metric-title">GPU</span>
+      <span class="metric-value">{{ logs.gpu }}</span>
+    </div>
+  </div>
+
+</div>
+
+      <!-- GRAPH CARD -->
+      <div class="graph-card" id="graphBox">
+        <div class="graph-header">
+          <div class="graph-title-wrap">
+            <div class="graph-title-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                <polyline points="17 6 23 6 23 12"/>
+              </svg>
+            </div>
+            <span class="graph-title">Training Loss Over Epochs</span>
+          </div>
+          <div class="graph-dropdown">
+            Training Loss
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+        </div>
+        <canvas id="lossChart"></canvas>
+      </div>
+<div class="graph-card">
+  <div class="graph-header">
+    <div class="graph-title-wrap">
+      <div class="graph-title-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="1.8">
+          <circle cx="12" cy="12" r="9"/>
+        </svg>
+      </div>
+      <span class="graph-title">IoU Progression</span>
+    </div>
+  </div>
+  <canvas id="iouChart"></canvas>
+</div>
+
+<div class="graph-card">
+  <div class="graph-header">
+    <div class="graph-title-wrap">
+      <div class="graph-title-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="1.8">
+          <path d="M4 12l5 5L20 6"/>
+        </svg>
+      </div>
+      <span class="graph-title">F1 Score Progression</span>
+    </div>
+  </div>
+  <canvas id="f1Chart"></canvas>
+</div>
+
+<div class="graph-card">
+  <div class="graph-header">
+    <div class="graph-title-wrap">
+      <div class="graph-title-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="1.8">
+          <path d="M12 2v20"/>
+        </svg>
+      </div>
+      <span class="graph-title">Precision vs Recall</span>
+    </div>
+  </div>
+  <canvas id="prChart"></canvas>
+</div>
+<p class="graph-note">
+  Metrics demonstrate stable convergence and progressive feature learning across training epochs.
+</p>
+
+      <p class="section-title">Training Configuration</p>
+
+<div class="weights-grid" style="margin-bottom:20px;">
+
+  <div class="weight-card">
+    <div class="weight-label">Model</div>
+    <div class="weight-val">{{ logs.model_name }}</div>
+  </div>
+
+  <div class="weight-card">
+    <div class="weight-label">Optimizer</div>
+    <div class="weight-val">{{ logs.optimizer }}</div>
+  </div>
+
+  <div class="weight-card">
+    <div class="weight-label">Learning Rate</div>
+    <div class="weight-val">{{ logs.learning_rate }}</div>
+  </div>
+
+  <div class="weight-card">
+    <div class="weight-label">Batch Size</div>
+    <div class="weight-val">{{ logs.batch_size }}</div>
+  </div>
+
+  <div class="weight-card">
+    <div class="weight-label">Image Size</div>
+    <div class="weight-val">{{ logs.image_size }}</div>
+  </div>
+
+  <div class="weight-card">
+    <div class="weight-label">Framework</div>
+    <div class="weight-val">PyTorch</div>
+  </div>
+
+</div>
+
+<p class="section-title">Performance Analytics</p>
+
+<div class="flip-grid">
+
+  <div class="flip-card">
+    <div class="flip-inner">
+      <div class="flip-front">
+        <h3>IoU Score</h3>
+        <div class="flip-label">{{ logs.final_iou }}</div>
+      </div>
+      <div class="flip-back">
+        <p>
+          Intersection over Union measures overlap between predicted segmentation and ground truth masks.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flip-card">
+    <div class="flip-inner">
+      <div class="flip-front">
+        <h3>F1 Score</h3>
+        <div class="flip-label">{{ logs.final_f1 }}</div>
+      </div>
+      <div class="flip-back">
+        <p>
+          F1 Score balances precision and recall for robust camouflage segmentation evaluation.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flip-card">
+    <div class="flip-inner">
+      <div class="flip-front">
+        <h3>Dice Score</h3>
+        <div class="flip-label">{{ logs.final_dice }}</div>
+      </div>
+      <div class="flip-back">
+        <p>
+          Dice Coefficient evaluates similarity between predicted masks and actual hidden object regions.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+<p class="section-title">Epoch-wise Training Logs</p>
+
+<div class="graph-card" style="overflow-x:auto;">
+
+<table style="width:100%; border-collapse:collapse; font-size:14px;">
+
+<thead>
+<tr style="border-bottom:1px solid #e2e8f0; color:#64748b;">
+<th style="padding:12px;">Epoch</th>
+<th style="padding:12px;">Loss</th>
+<th style="padding:12px;">IoU</th>
+<th style="padding:12px;">F1</th>
+<th style="padding:12px;">Precision</th>
+<th style="padding:12px;">Recall</th>
+</tr>
+</thead>
+
+<tbody id="epochTableBody"></tbody>
+
+</table>
+
+</div>
+      <!-- VIEW COMPARISON BUTTON -->
+      <div class="action-row">
+        <a href="/comparison" class="btn">View Comparison →</a>
+      </div>
+
+    </div><!-- /content-wrap -->
+
+    <!-- ── FOOTER CARD ── -->
+    <div style="padding: 0 22px;">
+      <div class="footer-bar">
+        <svg class="footer-shield" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span class="footer-text">Training pipeline completed successfully. The optimized SINet model is now ready for camouflage segmentation inference and evaluation.
+</span>
+      </div>
+    </div>
+    <div style="height:14px;"></div>
+
+  </div><!-- /main-content -->
+
+</div><!-- /page -->
+
+<!-- ══ MODAL ══ -->
+<div id="modal" class="modal" onclick="closeModal()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <img id="modalImg" style="display:none;" alt="">
+    <div class="modal-text" id="modalText"></div>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script id="training-data" type="application/json">
+  {{ logs | tojson }}
+</script>
+
+<script>
+function openModal(img, text) {
+  document.getElementById("modal").style.display = "flex";
+  document.getElementById("modalText").innerText = text;
+  if (img) {
+    document.getElementById("modalImg").style.display = "block";
+    document.getElementById("modalImg").src = img;
+  } else {
+    document.getElementById("modalImg").style.display = "none";
+  }
+}
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+}
+
+const rawData = document.getElementById("training-data").textContent;
+const logs = JSON.parse(rawData);
+const lossData = logs.loss;
+const labels = Array.from({length: lossData.length}, (_, i) => i + 1);
+
+function createChart() {
+  const ctx = document.getElementById('lossChart');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Training Loss',
+        data: lossData,
+        borderWidth: 2,
+        tension: 0.3,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointBackgroundColor: '#4F46E5',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointHoverBorderWidth: 2,
+        pointHoverBorderColor: '#fff',
+        borderColor: '#4F46E5',
+        backgroundColor: 'rgba(99,102,241,0.10)',
+        fill: true,
+      }]
+    },
+    options: {
+      animation: { duration: 1200, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { labels: { color: '#64748b', font: { family: 'Inter', size: 12 } } }
+      },
+      interaction: { mode: 'nearest', intersect: false },
+      scales: {
+        x: {
+          title: { display: true, text: 'Epoch', color: '#94a3b8', font: { family: 'Inter', size: 12 } },
+          ticks: { color: '#94a3b8', font: { family: 'Inter' } },
+          grid: { color: 'rgba(0,0,0,0.04)' }
+        },
+        y: {
+          title: { display: true, text: 'Loss', color: '#94a3b8', font: { family: 'Inter', size: 12 } },
+          ticks: { color: '#94a3b8', font: { family: 'Inter' } },
+          grid: { color: 'rgba(0,0,0,0.04)' }
+        }
+      }
+    }
+  });
+}
+function createMetricChart(canvasId, label, data, color) {
+
+  const ctx = document.getElementById(canvasId);
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: label,
+        data: data,
+        borderColor: color,
+        backgroundColor: color + '22',
+        fill: true,
+        tension: 0.3,
+        borderWidth: 2,
+        pointRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          labels: {
+            color: '#64748b'
+          }
+        }
+      }
+    }
+  });
+}
+
+createMetricChart(
+  'iouChart',
+  'IoU',
+  logs.iou,
+  '#7C3AED'
+);
+
+createMetricChart(
+  'f1Chart',
+  'F1 Score',
+  logs.f1_score,
+  '#4F46E5'
+);
+
+const prCtx = document.getElementById('prChart');
+
+new Chart(prCtx, {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        label: 'Precision',
+        data: logs.precision,
+        borderColor: '#059669',
+        backgroundColor: '#05966922',
+        fill: false,
+        tension: 0.3
+      },
+      {
+        label: 'Recall',
+        data: logs.recall,
+        borderColor: '#EF4444',
+        backgroundColor: '#EF444422',
+        fill: false,
+        tension: 0.3
+      }
+    ]
+  }
+});
+
+const tbody = document.getElementById("epochTableBody");
+
+for(let i=0; i<labels.length; i++) {
+
+  tbody.innerHTML += `
+    <tr style="border-bottom:1px solid #f1f5f9;">
+      <td style="padding:12px; text-align:center;">${i+1}</td>
+      <td style="padding:12px; text-align:center;">${logs.loss[i].toFixed(4)}</td>
+      <td style="padding:12px; text-align:center;">${logs.iou[i].toFixed(4)}</td>
+      <td style="padding:12px; text-align:center;">${logs.f1_score[i].toFixed(4)}</td>
+      <td style="padding:12px; text-align:center;">${logs.precision[i].toFixed(4)}</td>
+      <td style="padding:12px; text-align:center;">${logs.recall[i].toFixed(4)}</td>
+    </tr>
+  `;
+}
+const counters = document.querySelectorAll('.counter');
+
+counters.forEach(counter => {
+
+  const target = parseFloat(
+    counter.dataset.target
+  );
+
+  let current = 0;
+
+  const updateCounter = () => {
+
+    current += target / 40;
+
+    if(current < target){
+
+      counter.innerText =
+        current.toFixed(3);
+
+      requestAnimationFrame(updateCounter);
+
+    } else {
+
+      counter.innerText =
+        target.toFixed(3);
+    }
+  };
+
+  updateCounter();
+});
+let chartCreated = false;
+const observer = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting && !chartCreated) {
+    createChart();
+    chartCreated = true;
+  }
+}, { threshold: 0.3 });
+observer.observe(document.getElementById("graphBox"));
+</script>
+
+</body>
+</html>

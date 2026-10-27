@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camouflage Detection - Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%;
+            overflow: hidden; /* Removes scroll bar */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8f9fc;
+            color: #1a1a2e;
+        }
+
+        /* ══ ANIMATIONS ══ */
+        @keyframes pageIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* ══ BACKGROUND: Concentric rings & Glow ══ */
+        .bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bg-canvas::before {
+            content: '';
+            position: absolute;
+            top: 50px;
+            left: 20%;
+            width: 60%;
+            height: 500px;
+            background: radial-gradient(ellipse at center, rgba(99,102,241,0.08) 0%, transparent 60%);
+        }
+
+        .bg-canvas::after {
+            content: '';
+            position: absolute;
+            top: -200px;
+            right: -250px;
+            width: 900px;
+            height: 900px;
+            background-image: repeating-radial-gradient(
+                circle at center,
+                transparent 0,
+                transparent 45px,
+                rgba(99,102,241,0.035) 46px,
+                rgba(99,102,241,0.035) 47px
+            );
+            border-radius: 50%;
+        }
+
+        /* ══ NAVBAR ══ */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 26px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #eef0f5;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            margin: 0 22px;
+            margin-top: 0;
+            border-radius: 0 0 16px 16px; 
+            position: relative;
+            z-index: 10;
+            animation: pageIn 0.5s ease forwards;
+        }
+
+        .nav-brand { display: flex; align-items: center; }
+        .nav-logo img { width: 30px; height: 30px; margin-right: 12px; filter: drop-shadow(0 2px 4px rgba(99,102,241,0.3)); }
+        .brand-text { font-size: 18px; font-weight: 700; color: #0f172a; }
+        .brand-sub { font-size: 18px; font-weight: 400; color: #64748b; margin-left: 4px; }
+
+        .nav-links { display: flex; gap: 32px; list-style: none; }
+        .nav-links a { text-decoration: none; font-size: 14px; font-weight: 500; color: #475569; transition: 0.2s; }
+        .nav-links a.active { color: #4F46E5; position: relative; }
+        .nav-links a.active::after {
+            content: ''; position: absolute; bottom: -6px; left: 0; right: 0; height: 2px; background: #4F46E5; border-radius: 2px;
+        }
+
+        /* ══ MAIN LAYOUT ══ */
+        .page {
+            position: relative;
+            z-index: 1;
+            height: calc(100vh - 88px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;   
+            padding-top: 0px;            
+            padding-left: 20px;
+            padding-right: 20px;
+            animation: pageIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+  .hero-divider {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 2px;
+  }
+  .hero-divider .line-long {
+    width: 44px; height: 2px;
+    background: linear-gradient(90deg, #4F46E5, #7C3AED);
+    border-radius: 2px;
+  }
+  .hero-divider .dot-accent {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: #7C3AED;
+  }
+  .hero-divider .line-short {
+    width: 16px; height: 2px;
+    background: #cbd5e1;
+    border-radius: 2px;
+  }
+        /* Floating Dot Grid */
+        .dot-grid {
+            position: absolute;
+            top: 80px;
+            left: 40px;
+            display: grid;
+            grid-template-columns: repeat(7, 12px);
+            gap: 12px;
+            opacity: 0.3;
+        }
+        .dot-grid span { width: 3px; height: 3px; border-radius: 50%; background: #4F46E5; }
+
+ .top-row {
+    position: relative;
+    width: 100%;
+    max-width: 1300px;
+margin: 20px auto 16px auto;
+
+    display: flex;
+    align-items: center;
+}
+
+/* LEFT */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #4F46E5;
+    text-decoration: none;
+}
+
+/* CENTER (ABSOLUTE CENTERING 🔥) */
+.breadcrumb {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+text-decoration: none;
+    background: #eff6ff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: #4F46E5;
+    font-weight: 600;
+}
+.breadcrumb img {
+    width: 14px;
+    height: 14px;
+}
+.breadcrumb:visited {
+    color: #4F46E5;          /* prevent purple after click */
+}
+
+.breadcrumb:hover {
+    background: #e0e7ff;     /* subtle hover like UI */
+}
+        h1 { font-size: 42px; font-weight: 700; color: #111827; letter-spacing: -1.2px; margin-bottom: 12px; }
+        .subtitle { font-size: 17px; color: #64748b; margin-bottom: 10px; }
+
+        /* ══ THE UPLOAD CARD ══ */
+        .main-card {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 24px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            transition: 0.3s ease;
+        }
+        .main-card:hover { transform: translateY(-4px); box-shadow: 0 15px 35px rgba(0,0,0,0.06); }
+
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            background: #fafafa;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: 0.2s;
+        }
+        .upload-area:hover { border-color: #4F46E5; background: #f5f7ff; }
+.upload-icon-circle svg { color: #4F46E5; width: 32px; height: 32px; }
+
+.format-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 15px;
+}
+        #previewImg {
+    position: absolute;
+
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+
+    width: calc(100% - 24px);
+    height: calc(100% - 24px);
+
+    object-fit: contain;
+    border-radius: 12px;
+
+    background: white;
+    display: none;
+    z-index: 5;
+}
+
+        .btn-action {
+            margin-top: 30px;
+            padding: 14px 44px;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25);
+            transition: all 0.2s ease;
+        }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(79, 70, 229, 0.35); }
+
+        /* ══ THEMED ALERT ══ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-box {
+            background: white;
+            padding: 32px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .btn-close { background: #4F46E5; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="bg-canvas"></div>
+
+<nav>
+    <div class="nav-brand">
+        <div class="nav-logo"><img src="/static/brain.png" alt="logo"></div>
+        <span class="brand-text">Apex - Vision</span>
+    </div>
+    <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/demo" class="active">Demo</a></li>
+        <li><a href="/dataset">Dataset</a></li>
+        <li><a href="/training">Training</a></li>
+    </ul>
+</nav>
+
+<div class="page">
+    <div class="dot-grid">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+
+    </div>
+
+<div class="top-row">
+
+    <a href="/" class="back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back to Home
+    </a>
+
+    <a href="/" class="breadcrumb">
+        <img src="/static/home.png" alt="home">
+        / Demo
+    </a>
+
+</div>
+    <h1>Camouflaged Object Detection</h1>
+    <p class="subtitle">Upload an image to experience our AI vision</p>
+    <div class="hero-divider">
+      <div class="line-long"></div>
+      <div class="dot-accent"></div>
+      <div class="line-short"></div>
+    </div>
+        <div class="main-card">
+        <form action="/predict" method="POST" enctype="multipart/form-data" id="uploadForm">
+            
+            <label class="upload-area" id="uploadBox">
+                <img id="previewImg">
+                <div id="uploadInstructions">
+                    <div class="upload-icon-circle">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 12v9"></path>
+                            <path d="M16 16l-4-4-4 4"></path>
+                            <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                        </svg>
+                    </div>
+
+                    <h3 style="font-size: 22px; color: #0f172a; font-weight: 700;">Drag & Drop your image here</h3>
+                    <p style="font-size: 15px; color: #64748b; margin-top: 8px;">or click to browse from your device</p>
+                    
+                </div>
+                <input type="file" name="image" id="fileInput">
+            </label>
+
+            <div class="format-info">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="background: #e0e7ff; color: #4F46E5; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">i</div>
+                    Supported formats: JPG, JPEG, PNG
+                </div>
+                <span style="color: #cbd5e1;">•</span>
+                <span>Max size: 10MB</span>
+            </div>
+
+            <button type="button" class="btn-action" id="actionBtn" onclick="handleAction()">Upload Image</button>
+        </form>
+    </div>
+
+</div>
+
+<div class="modal-overlay" id="alertModal">
+    <div class="modal-box">
+        <div style="background: #fef2f2; color: #ef4444; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h3>Image not uploaded</h3>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Please select an image file before proceeding to detection.</p>
+        <button class="btn-close" onclick="closeAlert()">Try Again</button>
+    </div>
+</div>
+
+<script>
+    const fileInput = document.getElementById("fileInput");
+    const actionBtn = document.getElementById("actionBtn");
+    const previewImg = document.getElementById("previewImg");
+    const uploadInstructions = document.getElementById("uploadInstructions");
+    const alertModal = document.getElementById("alertModal");
+    const uploadForm = document.getElementById("uploadForm");
+
+    // Reset view on page load
+    window.onload = function() {
+        uploadForm.reset();
+        previewImg.style.display = "none";
+        uploadInstructions.style.display = "block";
+        actionBtn.innerText = "Upload Image";
+    };
+
+    fileInput.addEventListener("change", function () {
+        if (fileInput.files && fileInput.files[0]) {
+            previewImg.src = URL.createObjectURL(fileInput.files[0]);
+            previewImg.style.display = "block";
+            uploadInstructions.style.display = "none";
+            actionBtn.innerText = "Detect Image";
+        }
+    });
+
+    function handleAction() {
+        if (!fileInput.files || fileInput.files.length === 0) {
+            alertModal.style.display = "flex";
+        } else {
+            uploadForm.submit();
+        }
+    }
+
+    function closeAlert() { alertModal.style.display = "none"; }
+    window.onclick = function(event) { if (event.target == alertModal) closeAlert(); }
+</script>
+
+</body>
+</html>
